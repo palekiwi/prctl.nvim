@@ -9,6 +9,7 @@ M.pr_picker = function(prs, opts)
   local actions = require('telescope.actions')
   local action_state = require('telescope.actions.state')
   local entry_display = require('telescope.pickers.entry_display')
+  local sorters = require('telescope.sorters')
   local tree = require('prctl.tree')
 
   -- Build tree structure and flatten for display
@@ -72,7 +73,7 @@ M.pr_picker = function(prs, opts)
         }
       end,
     }),
-    sorter = conf.generic_sorter(opts),
+    sorter = sorters.get_substr_matcher(),
     attach_mappings = function(prompt_bufnr, _)
       actions.select_default:replace(function()
         local selection = action_state.get_selected_entry()
