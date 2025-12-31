@@ -53,14 +53,26 @@ M.pr_picker = function(prs, opts)
         local gh = require('prctl.gh')
         local utils = require('prctl.utils')
 
+        -- Show immediate feedback
+        local notif_id = utils.notify_info(
+          string.format("Checking out PR #%d...", pr.number),
+          { timeout = false }
+        )
+
         -- Checkout the selected PR
         gh.checkout_pr(
           pr.number,
           function()
-            utils.notify_success(string.format("✓ Checked out PR #%d", pr.number))
+            utils.notify_success(
+              string.format("✓ Checked out PR #%d", pr.number),
+              { replace = notif_id, timeout = 3000 }
+            )
           end,
           function(err)
-            utils.notify_error("Checkout failed: " .. err)
+            utils.notify_error(
+              "Checkout failed: " .. err,
+              { replace = notif_id, timeout = 5000 }
+            )
           end
         )
       end)
