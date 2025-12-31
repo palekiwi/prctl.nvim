@@ -15,7 +15,7 @@ M.pr_picker = function(prs, opts)
     separator = "\t",
     items = {
       { width = 6 },        -- PR number
-      { width = 40 },       -- Title
+      { width = 80 },       -- Title
       { remaining = true }, -- Author
     },
   })
@@ -24,9 +24,9 @@ M.pr_picker = function(prs, opts)
   local make_display = function(entry)
     local pr = entry.value
     return displayer({
-      string.format("#%d", pr.number),
+      pr.number,
       pr.title,
-      "@" .. pr.author.login,
+      pr.author.login,
     })
   end
 
@@ -39,12 +39,12 @@ M.pr_picker = function(prs, opts)
         return {
           value = pr,
           display = make_display,
-          ordinal = string.format("#%d %s %s", pr.number, pr.title, pr.author.login),
+          ordinal = string.format("%d %s %s", pr.number, pr.title, pr.author.login),
         }
       end,
     }),
     sorter = conf.generic_sorter(opts),
-    attach_mappings = function(prompt_bufnr, map)
+    attach_mappings = function(prompt_bufnr, _)
       actions.select_default:replace(function()
         local selection = action_state.get_selected_entry()
         actions.close(prompt_bufnr)
