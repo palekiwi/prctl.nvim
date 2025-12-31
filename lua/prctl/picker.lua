@@ -24,7 +24,7 @@ M.pr_picker = function(prs, opts)
     local pr = entry.pr
     local prefix = tree.get_tree_prefix(entry)
     local tree_and_number = prefix .. tostring(pr.number)
-    
+
     max_tree_number_width = math.max(max_tree_number_width, vim.fn.strdisplaywidth(tree_and_number))
     max_title_width = math.max(max_title_width, vim.fn.strdisplaywidth(pr.title))
     max_author_width = math.max(max_author_width, vim.fn.strdisplaywidth(pr.author.login))
@@ -39,9 +39,9 @@ M.pr_picker = function(prs, opts)
   local displayer = entry_display.create({
     separator = " ",
     items = {
-      { width = max_tree_number_width },  -- Dynamic: tree prefix + PR number
-      { width = max_title_width },        -- Dynamic: title
-      { width = max_author_width },       -- Dynamic: author name
+      { width = max_tree_number_width }, -- Dynamic: tree prefix + PR number
+      { width = max_title_width },       -- Dynamic: title
+      { width = max_author_width },      -- Dynamic: author name
     },
   })
 
@@ -52,21 +52,21 @@ M.pr_picker = function(prs, opts)
       results = flat_entries,
       entry_maker = function(entry)
         local pr = entry.pr
-        
+
         -- Get tree prefix
         local prefix = tree.get_tree_prefix(entry)
-        
+
         -- Build tree + number combined
         local tree_and_number = prefix .. tostring(pr.number)
-        
+
         return {
           value = entry,
           ordinal = string.format("%d %s %s", pr.number, pr.title, pr.author.login),
-          display = function(e)
+          display = function()
             return displayer({
-              { tree_and_number, "PrctlNumber" },  -- Tree + number in green
-              pr.title,                             -- Title in default color
-              { pr.author.login, "PrctlAuthor" },  -- Author in blue
+              { tree_and_number, "PrctlNumber" }, -- Tree + number in green
+              pr.title,                           -- Title in default color
+              { pr.author.login, "PrctlAuthor" }, -- Author in blue
             })
           end,
         }
