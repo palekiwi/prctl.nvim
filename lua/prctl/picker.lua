@@ -19,6 +19,7 @@ M.pr_picker = function(prs, opts)
   local max_tree_number_width = 0
   local max_title_width = 0
   local max_author_width = 0
+  local max_branch_width = 0
 
   for _, entry in ipairs(flat_entries) do
     local pr = entry.pr
@@ -28,12 +29,14 @@ M.pr_picker = function(prs, opts)
     max_tree_number_width = math.max(max_tree_number_width, vim.fn.strdisplaywidth(tree_and_number))
     max_title_width = math.max(max_title_width, vim.fn.strdisplaywidth(pr.title))
     max_author_width = math.max(max_author_width, vim.fn.strdisplaywidth(pr.author.login))
+    max_branch_width = math.max(max_branch_width, vim.fn.strdisplaywidth(pr.headRefName))
   end
 
   -- Apply constraints: minimum widths for consistency, maximum to prevent extreme cases
   max_tree_number_width = math.min(math.max(max_tree_number_width, 8), 30)
   max_title_width = math.min(math.max(max_title_width, 20), 80)
   max_author_width = math.min(math.max(max_author_width, 15), 35)
+  max_branch_width = math.min(math.max(max_branch_width, 15), 40)
 
   -- Create displayer with dynamic widths
   local displayer = entry_display.create({
@@ -42,6 +45,7 @@ M.pr_picker = function(prs, opts)
       { width = max_tree_number_width }, -- Dynamic: tree prefix + PR number
       { width = max_title_width },       -- Dynamic: title
       { width = max_author_width },      -- Dynamic: author name
+      { width = max_branch_width },      -- Dynamic: branch name
     },
   })
 
@@ -61,12 +65,13 @@ M.pr_picker = function(prs, opts)
 
         return {
           value = entry,
-          ordinal = string.format("%d %s %s", pr.number, pr.title, pr.author.login),
+          ordinal = string.format("%d %s %s %s", pr.number, pr.title, pr.author.login, pr.headRefName),
           display = function()
             return displayer({
               { tree_and_number, "PrctlNumber" }, -- Tree + number in green
               pr.title,                           -- Title in default color
               { pr.author.login, "PrctlAuthor" }, -- Author in blue
+              { pr.headRefName, "PrctlBranch" },  -- Branch name in green, not bold
             })
           end,
         }
