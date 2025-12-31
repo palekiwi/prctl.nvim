@@ -116,8 +116,8 @@ M.pr_picker = function(prs, opts)
           { timeout = false }
         )
 
-        -- Checkout the selected PR
-        gh.checkout_pr(
+        -- Checkout the selected PR in a terminal split
+        gh.checkout_pr_in_terminal(
           pr.number,
           function()
             utils.notify_success(
