@@ -8,37 +8,40 @@ M.pr_picker = function(prs, opts)
   local conf = require('telescope.config').values
   local actions = require('telescope.actions')
   local action_state = require('telescope.actions.state')
-  local entry_display = require('telescope.pickers.entry_display')
+  local tree = require('prctl.tree')
 
-  -- Create entry displayer for consistent formatting
-  local displayer = entry_display.create({
-    separator = "\t",
-    items = {
-      { width = 6 },        -- PR number
-      { width = 80 },       -- Title
-      { remaining = true }, -- Author
-    },
-  })
-
-  -- Entry maker function
-  local make_display = function(entry)
-    local pr = entry.value
-    return displayer({
-      { pr.number,       "PrctlNumber" },
-      { pr.title,        "PrctlTitle" },
-      { pr.author.login, "PrctlAuthor" },
-    })
-  end
+  -- Build tree structure and flatten for display
+  local tree_structure = tree.build_pr_tree(prs)
+  local flat_entries = tree.flatten_tree(tree_structure)
 
   -- Create picker
   pickers.new(opts, {
     prompt_title = "Pull Requests",
     finder = finders.new_table({
-      results = prs,
-      entry_maker = function(pr)
+      results = flat_entries,
+      entry_maker = function(entry)
+        local pr = entry.pr
+        
+        -- Get tree prefix
+        local prefix = tree.get_tree_prefix(entry)
+        
+        -- Build display string
+        local number_str = tostring(pr.number)
+        local combined = prefix .. number_str .. " " .. pr.title
+        
+        -- Truncate if too long
+        local max_width = 80
+        if #combined > max_width then
+          combined = combined:sub(1, max_width - 3) .. "..."
+        end
+        
+        -- Pad for author alignment
+        local padding = string.rep(" ", math.max(0, 80 - vim.fn.strdisplaywidth(combined)))
+        local display_str = combined .. padding .. " " .. pr.author.login
+        
         return {
-          value = pr,
-          display = make_display,
+          value = entry,
+          display = display_str,
           ordinal = string.format("%d %s %s", pr.number, pr.title, pr.author.login),
         }
       end,
@@ -49,7 +52,7 @@ M.pr_picker = function(prs, opts)
         local selection = action_state.get_selected_entry()
         actions.close(prompt_bufnr)
 
-        local pr = selection.value
+        local pr = selection.value.pr
         local gh = require('prctl.gh')
         local utils = require('prctl.utils')
 

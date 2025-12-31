@@ -2,9 +2,10 @@ local M = {}
 
 -- Setup custom highlight groups
 M.setup_highlights = function()
-  vim.api.nvim_set_hl(0, 'PrctlNumber', { fg = '#6e9440', bold = true }) -- Green
-  vim.api.nvim_set_hl(0, 'PrctlTitle', { link = 'Normal' })              -- Default color
-  vim.api.nvim_set_hl(0, 'PrctlAuthor', { fg = '#5f819d' })              -- Blue
+  vim.api.nvim_set_hl(0, 'PrctlNumber', { fg = '#6e9440', bold = true })        -- Green
+  vim.api.nvim_set_hl(0, 'PrctlTitle', { link = 'Normal' })                     -- Default color
+  vim.api.nvim_set_hl(0, 'PrctlAuthor', { fg = '#5f819d' })                     -- Blue
+  vim.api.nvim_set_hl(0, 'PrctlTreeConnector', { fg = '#6e738d', bold = false })-- Muted gray for tree lines
 end
 
 -- Initialize highlights on module load
