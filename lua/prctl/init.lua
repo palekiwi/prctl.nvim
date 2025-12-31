@@ -28,20 +28,36 @@ M.prctl = function(opts)
     return
   end
 
+  -- Show immediate feedback
+  local notif_id = utils.notify_info(
+    "Fetching pull requests...",
+    { timeout = false }
+  )
+
   -- Fetch PRs
   gh.fetch_prs(
     function(prs)
       vim.schedule(function()
         if #prs == 0 then
-          utils.notify_info("No pull requests found")
+          utils.notify_info(
+            "No pull requests found",
+            { replace = notif_id, timeout = 3000 }
+          )
           return
         end
+        
+        -- Dismiss the notification immediately since picker is opening
+        utils.dismiss_notification(notif_id)
+        
         picker.pr_picker(prs, opts)
       end)
     end,
     function(err)
       vim.schedule(function()
-        utils.notify_error("Failed to fetch PRs: " .. err)
+        utils.notify_error(
+          "Failed to fetch PRs: " .. err,
+          { replace = notif_id, timeout = 5000 }
+        )
       end)
     end
   )

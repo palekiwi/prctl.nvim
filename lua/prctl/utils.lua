@@ -41,4 +41,24 @@ M.notify_success = function(msg, opts)
   }, opts))
 end
 
+M.dismiss_notification = function(notif_id)
+  if not notif_id then
+    return
+  end
+  
+  -- If nvim-notify is available, use its dismiss API
+  if has_notify then
+    local notify = require("notify")
+    if notify.dismiss then
+      notify.dismiss({ id = notif_id, silent = true })
+    end
+  else
+    -- Fallback: send empty notification with immediate timeout
+    vim.notify("", vim.log.levels.INFO, {
+      replace = notif_id,
+      timeout = 1,
+    })
+  end
+end
+
 return M
