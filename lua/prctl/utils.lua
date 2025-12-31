@@ -9,7 +9,7 @@ M.is_git_repo = function()
     { 'git', 'rev-parse', '--is-inside-work-tree' },
     { text = true }
   ):wait()
-  
+
   return result.code == 0
 end
 
@@ -36,7 +36,7 @@ end
 
 M.notify_success = function(msg, opts)
   opts = opts or {}
-  vim.notify(msg, vim.log.levels.INFO, vim.tbl_extend("force", {
+  vim.notify(msg, vim.log.levels.DEBUG, vim.tbl_extend("force", {
     title = "prctl.nvim",
   }, opts))
 end
@@ -45,12 +45,12 @@ M.dismiss_notification = function(notif_id)
   if not notif_id then
     return
   end
-  
+
   -- If nvim-notify is available, use its dismiss API
   if has_notify then
     local notify = require("notify")
     if notify.dismiss then
-      notify.dismiss({ id = notif_id, silent = true })
+      notify.dismiss({ id = notif_id, silent = true, pending = true })
     end
   else
     -- Fallback: send empty notification with immediate timeout

@@ -64,7 +64,7 @@ M.pr_picker = function(prs, opts)
           pr.number,
           function()
             utils.notify_success(
-              string.format("✓ Checked out PR #%d", pr.number),
+              string.format("Checked out PR #%d", pr.number),
               { replace = notif_id, timeout = 3000 }
             )
           end,
