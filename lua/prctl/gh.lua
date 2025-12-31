@@ -5,7 +5,7 @@ M.fetch_prs = function(on_success, on_error)
   vim.system(
     {
       'gh', 'pr', 'list',
-      '--json', 'number,title,author,headRefName,baseRefName',
+      '--json', 'number,title,author,headRefName,baseRefName,labels',
       '--limit', '50'
     },
     { text = true },
