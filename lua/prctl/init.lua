@@ -1,23 +1,33 @@
 local M = {}
 
+-- Setup custom highlight groups
+M.setup_highlights = function()
+  vim.api.nvim_set_hl(0, 'PrctlNumber', { fg = '#6e9440', bold = true }) -- Green
+  vim.api.nvim_set_hl(0, 'PrctlTitle', { link = 'Normal' })              -- Default color
+  vim.api.nvim_set_hl(0, 'PrctlAuthor', { fg = '#5f819d' })              -- Blue
+end
+
+-- Initialize highlights on module load
+M.setup_highlights()
+
 M.prctl = function(opts)
   opts = opts or {}
-  
+
   local utils = require('prctl.utils')
   local gh = require('prctl.gh')
   local picker = require('prctl.picker')
-  
+
   -- Pre-flight checks
   if not utils.is_git_repo() then
     utils.notify_error("Not in a git repository")
     return
   end
-  
+
   if not utils.check_gh_installed() then
     utils.notify_error("GitHub CLI (gh) not installed")
     return
   end
-  
+
   -- Fetch PRs
   gh.fetch_prs(
     function(prs)
