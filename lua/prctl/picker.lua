@@ -17,6 +17,7 @@ M.pr_picker = function(prs, opts)
 
   -- Calculate maximum column widths dynamically
   local max_tree_number_width = 0
+  local max_title_width = 0
   local max_author_width = 0
 
   for _, entry in ipairs(flat_entries) do
@@ -25,11 +26,13 @@ M.pr_picker = function(prs, opts)
     local tree_and_number = prefix .. tostring(pr.number)
     
     max_tree_number_width = math.max(max_tree_number_width, vim.fn.strdisplaywidth(tree_and_number))
+    max_title_width = math.max(max_title_width, vim.fn.strdisplaywidth(pr.title))
     max_author_width = math.max(max_author_width, vim.fn.strdisplaywidth(pr.author.login))
   end
 
   -- Apply constraints: minimum widths for consistency, maximum to prevent extreme cases
   max_tree_number_width = math.min(math.max(max_tree_number_width, 8), 30)
+  max_title_width = math.min(math.max(max_title_width, 20), 80)
   max_author_width = math.min(math.max(max_author_width, 15), 35)
 
   -- Create displayer with dynamic widths
@@ -37,8 +40,8 @@ M.pr_picker = function(prs, opts)
     separator = " ",
     items = {
       { width = max_tree_number_width },  -- Dynamic: tree prefix + PR number
-      { remaining = true },                -- Title takes remaining space
-      { width = max_author_width },        -- Dynamic: author name
+      { width = max_title_width },        -- Dynamic: title
+      { width = max_author_width },       -- Dynamic: author name
     },
   })
 
