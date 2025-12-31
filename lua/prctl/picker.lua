@@ -5,12 +5,12 @@ local function format_labels(labels)
   if not labels or #labels == 0 then
     return ""
   end
-  
+
   local label_names = {}
   for _, label in ipairs(labels) do
     table.insert(label_names, label.name)
   end
-  
+
   return table.concat(label_names, ", ")
 end
 
@@ -81,7 +81,7 @@ M.pr_picker = function(prs, opts)
 
         -- Build tree + number combined
         local tree_and_number = prefix .. tostring(pr.number)
-        
+
         -- Format labels
         local labels_text = format_labels(pr.labels)
 
@@ -93,8 +93,8 @@ M.pr_picker = function(prs, opts)
               { tree_and_number, "PrctlNumber" }, -- Tree + number in green
               pr.title,                           -- Title in default color
               { pr.author.login, "PrctlAuthor" }, -- Author in blue
-              { labels_text, "PrctlLabel" },      -- Labels in muted color
-              { pr.headRefName, "PrctlBranch" },  -- Branch name in green, not bold
+              { labels_text,     "PrctlLabel" },  -- Labels in muted color
+              { pr.headRefName,  "PrctlBranch" }, -- Branch name in green, not bold
             })
           end,
         }
