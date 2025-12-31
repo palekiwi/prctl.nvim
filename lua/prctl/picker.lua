@@ -8,11 +8,39 @@ M.pr_picker = function(prs, opts)
   local conf = require('telescope.config').values
   local actions = require('telescope.actions')
   local action_state = require('telescope.actions.state')
+  local entry_display = require('telescope.pickers.entry_display')
   local tree = require('prctl.tree')
 
   -- Build tree structure and flatten for display
   local tree_structure = tree.build_pr_tree(prs)
   local flat_entries = tree.flatten_tree(tree_structure)
+
+  -- Calculate maximum column widths dynamically
+  local max_tree_number_width = 0
+  local max_author_width = 0
+
+  for _, entry in ipairs(flat_entries) do
+    local pr = entry.pr
+    local prefix = tree.get_tree_prefix(entry)
+    local tree_and_number = prefix .. tostring(pr.number)
+    
+    max_tree_number_width = math.max(max_tree_number_width, vim.fn.strdisplaywidth(tree_and_number))
+    max_author_width = math.max(max_author_width, vim.fn.strdisplaywidth(pr.author.login))
+  end
+
+  -- Apply constraints: minimum widths for consistency, maximum to prevent extreme cases
+  max_tree_number_width = math.min(math.max(max_tree_number_width, 8), 30)
+  max_author_width = math.min(math.max(max_author_width, 15), 35)
+
+  -- Create displayer with dynamic widths
+  local displayer = entry_display.create({
+    separator = " ",
+    items = {
+      { width = max_tree_number_width },  -- Dynamic: tree prefix + PR number
+      { remaining = true },                -- Title takes remaining space
+      { width = max_author_width },        -- Dynamic: author name
+    },
+  })
 
   -- Create picker
   pickers.new(opts, {
@@ -25,24 +53,19 @@ M.pr_picker = function(prs, opts)
         -- Get tree prefix
         local prefix = tree.get_tree_prefix(entry)
         
-        -- Build display string
-        local number_str = tostring(pr.number)
-        local combined = prefix .. number_str .. " " .. pr.title
-        
-        -- Truncate if too long
-        local max_width = 80
-        if #combined > max_width then
-          combined = combined:sub(1, max_width - 3) .. "..."
-        end
-        
-        -- Pad for author alignment
-        local padding = string.rep(" ", math.max(0, 80 - vim.fn.strdisplaywidth(combined)))
-        local display_str = combined .. padding .. " " .. pr.author.login
+        -- Build tree + number combined
+        local tree_and_number = prefix .. tostring(pr.number)
         
         return {
           value = entry,
-          display = display_str,
           ordinal = string.format("%d %s %s", pr.number, pr.title, pr.author.login),
+          display = function(e)
+            return displayer({
+              { tree_and_number, "PrctlNumber" },  -- Tree + number in green
+              pr.title,                             -- Title in default color
+              { pr.author.login, "PrctlAuthor" },  -- Author in blue
+            })
+          end,
         }
       end,
     }),
