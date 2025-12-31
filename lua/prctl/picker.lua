@@ -24,8 +24,8 @@ M.pr_picker = function(prs, opts)
   local make_display = function(entry)
     local pr = entry.value
     return displayer({
-      { pr.number, "PrctlNumber" },
-      { pr.title, "PrctlTitle" },
+      { pr.number,       "PrctlNumber" },
+      { pr.title,        "PrctlTitle" },
       { pr.author.login, "PrctlAuthor" },
     })
   end
