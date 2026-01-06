@@ -1,5 +1,19 @@
 local M = {}
 
+-- Helper function to format labels for display
+local function format_labels(labels)
+  if not labels or #labels == 0 then
+    return ""
+  end
+
+  local label_names = {}
+  for _, label in ipairs(labels) do
+    table.insert(label_names, label.name)
+  end
+
+  return table.concat(label_names, ", ")
+end
+
 M.pr_picker = function(prs, opts)
   opts = opts or {}
 
@@ -19,21 +33,28 @@ M.pr_picker = function(prs, opts)
   local max_tree_number_width = 0
   local max_title_width = 0
   local max_author_width = 0
+  local max_branch_width = 0
+  local max_labels_width = 0
 
   for _, entry in ipairs(flat_entries) do
     local pr = entry.pr
     local prefix = tree.get_tree_prefix(entry)
     local tree_and_number = prefix .. tostring(pr.number)
+    local labels_text = format_labels(pr.labels)
 
     max_tree_number_width = math.max(max_tree_number_width, vim.fn.strdisplaywidth(tree_and_number))
     max_title_width = math.max(max_title_width, vim.fn.strdisplaywidth(pr.title))
     max_author_width = math.max(max_author_width, vim.fn.strdisplaywidth(pr.author.login))
+    max_branch_width = math.max(max_branch_width, vim.fn.strdisplaywidth(pr.headRefName))
+    max_labels_width = math.max(max_labels_width, vim.fn.strdisplaywidth(labels_text))
   end
 
   -- Apply constraints: minimum widths for consistency, maximum to prevent extreme cases
   max_tree_number_width = math.min(math.max(max_tree_number_width, 8), 30)
   max_title_width = math.min(math.max(max_title_width, 20), 80)
   max_author_width = math.min(math.max(max_author_width, 15), 35)
+  max_branch_width = math.min(math.max(max_branch_width, 15), 40)
+  max_labels_width = math.min(math.max(max_labels_width, 10), 50)
 
   -- Create displayer with dynamic widths
   local displayer = entry_display.create({
@@ -42,6 +63,8 @@ M.pr_picker = function(prs, opts)
       { width = max_tree_number_width }, -- Dynamic: tree prefix + PR number
       { width = max_title_width },       -- Dynamic: title
       { width = max_author_width },      -- Dynamic: author name
+      { width = max_labels_width },      -- Dynamic: labels
+      { width = max_branch_width },      -- Dynamic: branch name
     },
   })
 
@@ -59,14 +82,19 @@ M.pr_picker = function(prs, opts)
         -- Build tree + number combined
         local tree_and_number = prefix .. tostring(pr.number)
 
+        -- Format labels
+        local labels_text = format_labels(pr.labels)
+
         return {
           value = entry,
-          ordinal = string.format("%d %s %s", pr.number, pr.title, pr.author.login),
+          ordinal = string.format("%d %s %s %s %s", pr.number, pr.title, pr.author.login, pr.headRefName, labels_text),
           display = function()
             return displayer({
               { tree_and_number, "PrctlNumber" }, -- Tree + number in green
               pr.title,                           -- Title in default color
               { pr.author.login, "PrctlAuthor" }, -- Author in blue
+              { labels_text,     "PrctlLabel" },  -- Labels in muted color
+              { pr.headRefName,  "PrctlBranch" }, -- Branch name in green, not bold
             })
           end,
         }
